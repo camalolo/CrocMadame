@@ -97,7 +97,7 @@ public partial class MainWindow : Window
             // Start the croc process
             _crocProcess = new Process();
             _crocProcess.StartInfo.FileName = "croc";
-            _crocProcess.StartInfo.Arguments = $"--yes --out \"{directory}\" {code}";
+            _crocProcess.StartInfo.Arguments = $"--yes --overwrite --out \"{directory}\" {code}";
             _crocProcess.StartInfo.UseShellExecute = false;
             _crocProcess.StartInfo.RedirectStandardOutput = true;
             _crocProcess.StartInfo.RedirectStandardError = true;
@@ -115,48 +115,7 @@ public partial class MainWindow : Window
             {
                 if (!string.IsNullOrEmpty(e.Data))
                 {
-                    if (e.Data.Contains('%'))
-                    {
-                        // Parse progress percentage
-                        var percentIndex = e.Data.IndexOf(" % ");
-                        if (percentIndex > 0)
-                        {
-                            var start = percentIndex;
-                            while (start > 0 && (char.IsDigit(e.Data[start - 1]) || e.Data[start - 1] == '.'))
-                                start--;
-                            var percentStr = e.Data.Substring(start, percentIndex - start);
-                            if (double.TryParse(percentStr, out double percent))
-                            {
-                                Dispatcher.Invoke(() => ProgressBar.Value = percent);
-                            }
-                        }
-                        // Parse filename from progress line
-                        var trimmed = e.Data.TrimStart();
-                        var spaceIndex = trimmed.IndexOf("   ");
-                        if (spaceIndex > 0)
-                        {
-                            var filename = trimmed.Substring(0, spaceIndex).Trim();
-                            if (!string.IsNullOrWhiteSpace(filename))
-                            {
-                                Dispatcher.Invoke(() => ProgressTextBlock.Text = $"Downloading: {filename}");
-                            }
-                        }
-                    }
-                    else if (e.Data.Contains("Receiving '"))
-                    {
-                        // Parse filename from receiving message
-                        var start = e.Data.IndexOf("Receiving '") + 11;
-                        var end = e.Data.IndexOf("'", start);
-                        if (end > start)
-                        {
-                            var filename = e.Data.Substring(start, end - start);
-                            Dispatcher.Invoke(() => ProgressTextBlock.Text = $"Downloading: {filename}");
-                        }
-                    }
-                    else
-                    {
-                        AppendOutput(e.Data);
-                    }
+                    AppendOutput(e.Data);
                 }
             };
 
@@ -213,8 +172,6 @@ public partial class MainWindow : Window
     private void ClearOutput()
     {
         OutputTextBox.Text = "";
-        ProgressBar.Value = 0;
-        ProgressTextBlock.Text = "";
     }
 
     private void AppendOutput(string text)
