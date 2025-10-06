@@ -93,6 +93,7 @@ public partial class MainWindow : Window
             // Disable controls during execution
             SetControlsEnabled(false);
             ClearOutput();
+            ResetProgress();
 
             // Start the croc process
             _crocProcess = new Process();
@@ -107,7 +108,15 @@ public partial class MainWindow : Window
             {
                 if (!string.IsNullOrEmpty(e.Data))
                 {
-                    AppendOutput(e.Data);
+                    if (TryParseProgress(e.Data, out double progress))
+                    {
+                        UpdateProgress(progress);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(e.Data))
+                    {
+                        AppendOutput(e.Data);
+                    }
+                    // Skip empty/whitespace-only lines
                 }
             };
 
@@ -115,7 +124,15 @@ public partial class MainWindow : Window
             {
                 if (!string.IsNullOrEmpty(e.Data))
                 {
-                    AppendOutput(e.Data);
+                    if (TryParseProgress(e.Data, out double progress))
+                    {
+                        UpdateProgress(progress);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(e.Data))
+                    {
+                        AppendOutput(e.Data);
+                    }
+                    // Skip empty/whitespace-only lines
                 }
             };
 
@@ -194,5 +211,33 @@ public partial class MainWindow : Window
             _crocProcess.Kill();
         }
         base.OnClosed(e);
+    }
+
+    private bool TryParseProgress(string line, out double progress)
+    {
+        progress = 0;
+        // Look for pattern like: "filename   45% |==========          | (size) [time]"
+        var match = System.Text.RegularExpressions.Regex.Match(line, @"(\d+)%\s*\|\s*.*\|\s*\(");
+        if (match.Success && double.TryParse(match.Groups[1].Value, out progress))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private void ResetProgress()
+    {
+        ProgressBar.Dispatcher.Invoke(() =>
+        {
+            ((System.Windows.Controls.ProgressBar)ProgressBar).Value = 0;
+        });
+    }
+
+    private void UpdateProgress(double progress)
+    {
+        ProgressBar.Dispatcher.Invoke(() =>
+        {
+            ((System.Windows.Controls.ProgressBar)ProgressBar).Value = progress;
+        });
     }
 }
