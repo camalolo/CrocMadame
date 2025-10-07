@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace CrocMadame;
 
@@ -22,10 +23,41 @@ public partial class MainWindow : Window
     private Process? _crocProcess;
     private readonly object _outputLock = new object();
 
+    private string GetDownloadsFolder()
+    {
+        try
+        {
+            using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"))
+            {
+                if (key != null)
+                {
+                    var value = key.GetValue("{374DE290-123F-4565-9164-39C4925E467B}");
+                    if (value != null)
+                    {
+                        string path = value.ToString();
+                        if (path.StartsWith("%"))
+                        {
+                            path = Environment.ExpandEnvironmentVariables(path);
+                        }
+                        return path;
+                    }
+                }
+            }
+        }
+        catch { }
+
+        // Fallback to default
+        return System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+    }
+
     public MainWindow()
     {
         InitializeComponent();
         SetupEventHandlers();
+
+        // Prefill the download destination with the user's Downloads folder
+        DirectoryTextBox.Text = GetDownloadsFolder();
+        UpdateDownloadButtonState();
     }
 
     private void SetupEventHandlers()
@@ -47,7 +79,7 @@ public partial class MainWindow : Window
         dialog.Description = "Select destination directory";
         dialog.ShowNewFolderButton = true;
         dialog.UseDescriptionForTitle = true;
-        dialog.InitialDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+        dialog.InitialDirectory = GetDownloadsFolder();
 
         if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
         {
