@@ -34,8 +34,8 @@ public partial class MainWindow : Window
                     var value = key.GetValue("{374DE290-123F-4565-9164-39C4925E467B}");
                     if (value != null)
                     {
-                        string path = value.ToString();
-                        if (path.StartsWith("%"))
+                        string path = value.ToString()!;
+                        if (!string.IsNullOrEmpty(path) && path.StartsWith("%"))
                         {
                             path = Environment.ExpandEnvironmentVariables(path);
                         }
