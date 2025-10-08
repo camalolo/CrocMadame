@@ -15,11 +15,12 @@ public class ReceiveHandler
     private readonly System.Windows.Controls.Button _cancelButton;
     private readonly System.Windows.Controls.ProgressBar _progressBar;
     private readonly System.Windows.Controls.TextBox _outputTextBox;
+    private readonly System.Windows.Controls.TextBox _relayTextBox;
     private readonly CrocProcessManager _processManager;
 
     public ReceiveHandler(System.Windows.Controls.TextBox codeTextBox, System.Windows.Controls.TextBox directoryTextBox, System.Windows.Controls.Button browseButton,
                           System.Windows.Controls.Button downloadButton, System.Windows.Controls.Button cancelButton, System.Windows.Controls.ProgressBar progressBar,
-                          System.Windows.Controls.TextBox outputTextBox, CrocProcessManager processManager)
+                          System.Windows.Controls.TextBox outputTextBox, System.Windows.Controls.TextBox relayTextBox, CrocProcessManager processManager)
     {
         _codeTextBox = codeTextBox;
         _directoryTextBox = directoryTextBox;
@@ -28,6 +29,7 @@ public class ReceiveHandler
         _cancelButton = cancelButton;
         _progressBar = progressBar;
         _outputTextBox = outputTextBox;
+        _relayTextBox = relayTextBox;
         _processManager = processManager;
     }
 
@@ -107,10 +109,20 @@ public class ReceiveHandler
         ClearOutput();
         ResetProgress();
 
-        string arguments = $"--yes --overwrite --out \"{directory}\" {code}";
+        string relayInput = _relayTextBox.Text.Trim();
+
+        string globalArgs = "";
+        if (!string.IsNullOrEmpty(relayInput))
+        {
+            globalArgs += $" --relay {relayInput}";
+        }
+
+        string commandArgs = $"--yes --overwrite --out \"{directory}\" {code}";
+
+        string arguments = globalArgs + " " + commandArgs;
 
         _outputTextBox.AppendText($"Starting croc with output directory: {directory}" + Environment.NewLine);
-        _outputTextBox.AppendText($"Command: croc {arguments}" + Environment.NewLine);
+        _outputTextBox.AppendText($"Command: croc{globalArgs} {commandArgs.Trim()}" + Environment.NewLine);
         _outputTextBox.AppendText(Environment.NewLine);
 
         int exitCode = await _processManager.StartProcess(arguments, AppendOutput, UpdateProgress);
