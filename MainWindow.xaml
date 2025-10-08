@@ -9,68 +9,150 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
+
         <!-- Title -->
-        <TextBlock Grid.Row="0" Text="Croc File Downloader" FontSize="24" FontWeight="Bold"
+        <TextBlock Grid.Row="0" Text="CrocMadame" FontSize="24" FontWeight="Bold"
                    HorizontalAlignment="Center" Margin="0,0,0,20"/>
-        
-        <!-- Input Section -->
-        <StackPanel Grid.Row="1" Margin="0,0,0,20">
-            <TextBlock Text="Secret Code:" FontSize="14" Margin="0,0,0,5"/>
-            <TextBox x:Name="CodeTextBox" Text="" FontSize="14" Height="35"
-                     VerticalContentAlignment="Center"/>
-        </StackPanel>
-        
-        <!-- Directory Selection Section -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,20">
-            <TextBlock Text="Destination Directory:" FontSize="14" Margin="0,0,0,5"/>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBox x:Name="DirectoryTextBox" Text="" FontSize="14" Height="35"
-                         VerticalContentAlignment="Center" Grid.Column="0" IsReadOnly="True"/>
-                <Button x:Name="BrowseButton" Content="Browse..." FontSize="14"
-                        Height="35" Margin="10,0,0,0" Grid.Column="1" Width="80"/>
-            </Grid>
-        </StackPanel>
 
-        <!-- Action Buttons -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center"
-                    Margin="0,0,0,20">
-            <Button x:Name="DownloadButton" Content="Download" FontSize="16"
-                    Width="120" Height="45" FontWeight="Bold"/>
-            <Button x:Name="CancelButton" Content="Cancel" FontSize="16"
-                    Width="120" Height="45" Margin="20,0,0,0" IsEnabled="False"/>
-        </StackPanel>
+        <!-- Tab Control -->
+        <TabControl Grid.Row="1" x:Name="MainTabControl">
+            <!-- Receive Tab -->
+            <TabItem Header="Receive">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-        <!-- Progress Bar -->
-        <StackPanel Grid.Row="4" Margin="0,0,0,20">
-            <TextBlock Text="Progress:" FontSize="14" Margin="0,0,0,5"/>
-            <ProgressBar x:Name="ProgressBar" Height="20" Minimum="0" Maximum="100" Value="0"/>
-        </StackPanel>
+                    <!-- Input Section -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                        <TextBlock Text="Secret Code:" FontSize="14" Margin="0,0,0,5"/>
+                        <TextBox x:Name="ReceiveCodeTextBox" Text="" FontSize="14" Height="35"
+                                 VerticalContentAlignment="Center"/>
+                    </StackPanel>
 
-        <!-- Blank Section -->
-        <Grid Grid.Row="5"/>
+                    <!-- Directory Selection Section -->
+                    <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                        <TextBlock Text="Destination Directory:" FontSize="14" Margin="0,0,0,5"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="ReceiveDirectoryTextBox" Text="" FontSize="14" Height="35"
+                                     VerticalContentAlignment="Center" Grid.Column="0" IsReadOnly="True"/>
+                            <Button x:Name="ReceiveBrowseButton" Content="Browse..." FontSize="14"
+                                    Height="35" Margin="10,0,0,0" Grid.Column="1" Width="80"/>
+                        </Grid>
+                    </StackPanel>
 
-        <!-- Output Section -->
-        <Grid Grid.Row="6">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="Output:" FontSize="14" Margin="0,0,0,5"/>
-            <TextBox x:Name="OutputTextBox" Grid.Row="1" TextWrapping="Wrap"
-                     VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
-                     FontSize="12" Height="80" IsReadOnly="True" Background="#F5F5F5"/>
-        </Grid>
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                                Margin="0,0,0,20">
+                        <Button x:Name="ReceiveDownloadButton" Content="Download" FontSize="16"
+                                Width="120" Height="45" FontWeight="Bold"/>
+                        <Button x:Name="ReceiveCancelButton" Content="Cancel" FontSize="16"
+                                Width="120" Height="45" Margin="20,0,0,0" IsEnabled="False"/>
+                    </StackPanel>
+
+                    <!-- Progress Bar -->
+                    <StackPanel Grid.Row="3" Margin="0,0,0,20">
+                        <TextBlock Text="Progress:" FontSize="14" Margin="0,0,0,5"/>
+                        <ProgressBar x:Name="ReceiveProgressBar" Height="20" Minimum="0" Maximum="100" Value="0"/>
+                    </StackPanel>
+
+                    <!-- Blank Section -->
+                    <Grid Grid.Row="4"/>
+
+                    <!-- Output Section -->
+                    <Grid Grid.Row="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Output:" FontSize="14" Margin="0,0,0,5"/>
+                        <TextBox x:Name="ReceiveOutputTextBox" Grid.Row="1" TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+                                 FontSize="12" Height="80" IsReadOnly="True" Background="#F5F5F5"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- Send Tab -->
+            <TabItem Header="Send">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Code Section -->
+                    <StackPanel Grid.Row="0" Margin="0,0,0,20">
+                        <TextBlock Text="Secret Code:" FontSize="14" Margin="0,0,0,5"/>
+                        <TextBox x:Name="SendCodeTextBox" Text="" FontSize="14" Height="35"
+                                 VerticalContentAlignment="Center" IsReadOnly="True" Background="#F0F0F0"/>
+                    </StackPanel>
+
+                    <!-- File/Directory Selection Section -->
+                    <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                        <TextBlock Text="File or Directory to Send:" FontSize="14" Margin="0,0,0,5"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <RadioButton x:Name="SendFileRadio" Content="File" GroupName="SendType" IsChecked="True"/>
+                            <RadioButton x:Name="SendDirectoryRadio" Content="Directory" GroupName="SendType" Margin="20,0,0,0"/>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="SendPathTextBox" Text="" FontSize="14" Height="35"
+                                     VerticalContentAlignment="Center" Grid.Column="0" IsReadOnly="True"/>
+                            <Button x:Name="SendBrowseButton" Content="Browse..." FontSize="14"
+                                    Height="35" Margin="10,0,0,0" Grid.Column="1" Width="80"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Action Buttons -->
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center"
+                                Margin="0,0,0,20">
+                        <Button x:Name="SendButton" Content="Send" FontSize="16"
+                                Width="120" Height="45" FontWeight="Bold"/>
+                        <Button x:Name="SendCancelButton" Content="Cancel" FontSize="16"
+                                Width="120" Height="45" Margin="20,0,0,0" IsEnabled="False"/>
+                    </StackPanel>
+
+                    <!-- Progress Bar -->
+                    <StackPanel Grid.Row="3" Margin="0,0,0,20">
+                        <TextBlock Text="Progress:" FontSize="14" Margin="0,0,0,5"/>
+                        <ProgressBar x:Name="SendProgressBar" Height="20" Minimum="0" Maximum="100" Value="0"/>
+                    </StackPanel>
+
+                    <!-- Blank Section -->
+                    <Grid Grid.Row="4"/>
+
+                    <!-- Output Section -->
+                    <Grid Grid.Row="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Output:" FontSize="14" Margin="0,0,0,5"/>
+                        <TextBox x:Name="SendOutputTextBox" Grid.Row="1" TextWrapping="Wrap"
+                                 VerticalScrollBarVisibility="Auto" FontFamily="Consolas"
+                                 FontSize="12" Height="80" IsReadOnly="True" Background="#F5F5F5"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

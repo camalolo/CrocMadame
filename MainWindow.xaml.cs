@@ -56,24 +56,34 @@ public partial class MainWindow : Window
         SetupEventHandlers();
 
         // Prefill the download destination with the user's Downloads folder
-        DirectoryTextBox.Text = GetDownloadsFolder();
-        UpdateDownloadButtonState();
+        ReceiveDirectoryTextBox.Text = GetDownloadsFolder();
+        UpdateReceiveDownloadButtonState();
     }
 
     private void SetupEventHandlers()
     {
-        BrowseButton.Click += BrowseButton_Click;
-        DownloadButton.Click += DownloadButton_Click;
-        CancelButton.Click += CancelButton_Click;
-        CodeTextBox.TextChanged += CodeTextBox_TextChanged;
+        MainTabControl.SelectionChanged += MainTabControl_SelectionChanged;
+
+        // Receive tab handlers
+        ReceiveBrowseButton.Click += ReceiveBrowseButton_Click;
+        ReceiveDownloadButton.Click += ReceiveDownloadButton_Click;
+        ReceiveCancelButton.Click += ReceiveCancelButton_Click;
+        ReceiveCodeTextBox.TextChanged += ReceiveCodeTextBox_TextChanged;
+
+        // Send tab handlers
+        SendBrowseButton.Click += SendBrowseButton_Click;
+        SendButton.Click += SendButton_Click;
+        SendCancelButton.Click += SendCancelButton_Click;
+        SendFileRadio.Checked += SendTypeRadio_Checked;
+        SendDirectoryRadio.Checked += SendTypeRadio_Checked;
     }
 
-    private void CodeTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    private void ReceiveCodeTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        UpdateDownloadButtonState();
+        UpdateReceiveDownloadButtonState();
     }
 
-    private void BrowseButton_Click(object sender, RoutedEventArgs e)
+    private void ReceiveBrowseButton_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new System.Windows.Forms.FolderBrowserDialog();
         dialog.Description = "Select destination directory";
@@ -83,30 +93,30 @@ public partial class MainWindow : Window
 
         if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
         {
-            DirectoryTextBox.Text = dialog.SelectedPath;
-            UpdateDownloadButtonState();
+            ReceiveDirectoryTextBox.Text = dialog.SelectedPath;
+            UpdateReceiveDownloadButtonState();
         }
     }
 
-    private void UpdateDownloadButtonState()
+    private void UpdateReceiveDownloadButtonState()
     {
-        bool isValid = !string.IsNullOrWhiteSpace(CodeTextBox.Text) &&
-                      !string.IsNullOrWhiteSpace(DirectoryTextBox.Text);
-        DownloadButton.IsEnabled = isValid;
+        bool isValid = !string.IsNullOrWhiteSpace(ReceiveCodeTextBox.Text) &&
+                      !string.IsNullOrWhiteSpace(ReceiveDirectoryTextBox.Text);
+        ReceiveDownloadButton.IsEnabled = isValid;
     }
 
-    private async void DownloadButton_Click(object sender, RoutedEventArgs e)
+    private async void ReceiveDownloadButton_Click(object sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(CodeTextBox.Text) ||
-            string.IsNullOrWhiteSpace(DirectoryTextBox.Text))
+        if (string.IsNullOrWhiteSpace(ReceiveCodeTextBox.Text) ||
+            string.IsNullOrWhiteSpace(ReceiveDirectoryTextBox.Text))
         {
             System.Windows.MessageBox.Show("Please enter a secret code and select a destination directory.",
                           "Input Required", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
-        string code = CodeTextBox.Text.Trim();
-        string directory = DirectoryTextBox.Text.Trim();
+        string code = ReceiveCodeTextBox.Text.Trim();
+        string directory = ReceiveDirectoryTextBox.Text.Trim();
 
         if (!Directory.Exists(directory))
         {
@@ -115,17 +125,17 @@ public partial class MainWindow : Window
             return;
         }
 
-        await StartCrocProcess(code, directory);
+        await StartReceiveCrocProcess(code, directory);
     }
 
-    private async Task StartCrocProcess(string code, string directory)
+    private async Task StartReceiveCrocProcess(string code, string directory)
     {
         try
         {
             // Disable controls during execution
-            SetControlsEnabled(false);
-            ClearOutput();
-            ResetProgress();
+            SetReceiveControlsEnabled(false);
+            ClearReceiveOutput();
+            ResetReceiveProgress();
 
             // Start the croc process
             _crocProcess = new Process();
@@ -142,11 +152,11 @@ public partial class MainWindow : Window
                 {
                     if (TryParseProgress(e.Data, out double progress))
                     {
-                        UpdateProgress(progress);
+                        UpdateReceiveProgress(progress);
                     }
                     else if (!string.IsNullOrWhiteSpace(e.Data))
                     {
-                        AppendOutput(e.Data);
+                        AppendReceiveOutput(e.Data);
                     }
                     // Skip empty/whitespace-only lines
                 }
@@ -158,19 +168,19 @@ public partial class MainWindow : Window
                 {
                     if (TryParseProgress(e.Data, out double progress))
                     {
-                        UpdateProgress(progress);
+                        UpdateReceiveProgress(progress);
                     }
                     else if (!string.IsNullOrWhiteSpace(e.Data))
                     {
-                        AppendOutput(e.Data);
+                        AppendReceiveOutput(e.Data);
                     }
                     // Skip empty/whitespace-only lines
                 }
             };
 
-            AppendOutput($"Starting croc with output directory: {directory}");
-            AppendOutput($"Command: croc --yes --out \"{directory}\" {code}");
-            AppendOutput("");
+            AppendReceiveOutput($"Starting croc with output directory: {directory}");
+            AppendReceiveOutput($"Command: croc --yes --out \"{directory}\" {code}");
+            AppendReceiveOutput("");
 
             _crocProcess.Start();
             _crocProcess.BeginOutputReadLine();
@@ -179,17 +189,17 @@ public partial class MainWindow : Window
             // Wait for process to complete
             await Task.Run(() => _crocProcess.WaitForExit());
 
-            AppendOutput("");
-            AppendOutput("Process completed.");
-            AppendOutput($"Exit code: {_crocProcess.ExitCode}");
+            AppendReceiveOutput("");
+            AppendReceiveOutput("Process completed.");
+            AppendReceiveOutput($"Exit code: {_crocProcess.ExitCode}");
 
             // Re-enable controls
-            SetControlsEnabled(true);
+            SetReceiveControlsEnabled(true);
         }
         catch (Exception ex)
         {
-            AppendOutput($"Error: {ex.Message}");
-            SetControlsEnabled(true);
+            AppendReceiveOutput($"Error: {ex.Message}");
+            SetReceiveControlsEnabled(true);
         }
         finally
         {
@@ -197,40 +207,40 @@ public partial class MainWindow : Window
         }
     }
 
-    private void CancelButton_Click(object sender, RoutedEventArgs e)
+    private void ReceiveCancelButton_Click(object sender, RoutedEventArgs e)
     {
         if (_crocProcess != null && !_crocProcess.HasExited)
         {
-            AppendOutput("Stopping croc process...");
+            AppendReceiveOutput("Stopping croc process...");
             _crocProcess.Kill();
             _crocProcess = null;
-            SetControlsEnabled(true);
+            SetReceiveControlsEnabled(true);
         }
     }
 
-    private void SetControlsEnabled(bool enabled)
+    private void SetReceiveControlsEnabled(bool enabled)
     {
-        CodeTextBox.IsEnabled = enabled;
-        DirectoryTextBox.IsEnabled = enabled;
-        BrowseButton.IsEnabled = enabled;
-        DownloadButton.IsEnabled = enabled && !string.IsNullOrWhiteSpace(CodeTextBox.Text) &&
-                                 !string.IsNullOrWhiteSpace(DirectoryTextBox.Text);
-        CancelButton.IsEnabled = !enabled;
+        ReceiveCodeTextBox.IsEnabled = enabled;
+        ReceiveDirectoryTextBox.IsEnabled = enabled;
+        ReceiveBrowseButton.IsEnabled = enabled;
+        ReceiveDownloadButton.IsEnabled = enabled && !string.IsNullOrWhiteSpace(ReceiveCodeTextBox.Text) &&
+                                  !string.IsNullOrWhiteSpace(ReceiveDirectoryTextBox.Text);
+        ReceiveCancelButton.IsEnabled = !enabled;
     }
 
-    private void ClearOutput()
+    private void ClearReceiveOutput()
     {
-        OutputTextBox.Text = "";
+        ReceiveOutputTextBox.Text = "";
     }
 
-    private void AppendOutput(string text)
+    private void AppendReceiveOutput(string text)
     {
         lock (_outputLock)
         {
-            OutputTextBox.Dispatcher.Invoke(() =>
+            ReceiveOutputTextBox.Dispatcher.Invoke(() =>
             {
-                OutputTextBox.AppendText(text + Environment.NewLine);
-                OutputTextBox.ScrollToEnd();
+                ReceiveOutputTextBox.AppendText(text + Environment.NewLine);
+                ReceiveOutputTextBox.ScrollToEnd();
             });
         }
     }
@@ -257,19 +267,256 @@ public partial class MainWindow : Window
         return false;
     }
 
-    private void ResetProgress()
+    private void ResetReceiveProgress()
     {
-        ProgressBar.Dispatcher.Invoke(() =>
+        ReceiveProgressBar.Dispatcher.Invoke(() =>
         {
-            ((System.Windows.Controls.ProgressBar)ProgressBar).Value = 0;
+            ReceiveProgressBar.Value = 0;
         });
     }
 
-    private void UpdateProgress(double progress)
+    private void UpdateReceiveProgress(double progress)
     {
-        ProgressBar.Dispatcher.Invoke(() =>
+        ReceiveProgressBar.Dispatcher.Invoke(() =>
         {
-            ((System.Windows.Controls.ProgressBar)ProgressBar).Value = progress;
+            ReceiveProgressBar.Value = progress;
+        });
+    }
+
+    // Tab selection changed
+    private void MainTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        // Tab changed - could add logic here if needed for different modes
+    }
+
+    // Send tab methods
+    private void SendBrowseButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (SendFileRadio.IsChecked == true)
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Title = "Select file to send";
+            dialog.CheckFileExists = true;
+            dialog.CheckPathExists = true;
+
+            if (dialog.ShowDialog() == true)
+            {
+                SendPathTextBox.Text = dialog.FileName;
+                UpdateSendButtonState();
+            }
+        }
+        else // Directory
+        {
+            var dialog = new System.Windows.Forms.FolderBrowserDialog();
+            dialog.Description = "Select directory to send";
+            dialog.ShowNewFolderButton = false;
+            dialog.UseDescriptionForTitle = true;
+
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                SendPathTextBox.Text = dialog.SelectedPath;
+                UpdateSendButtonState();
+            }
+        }
+    }
+
+    private void SendTypeRadio_Checked(object sender, RoutedEventArgs e)
+    {
+        // Clear the path when switching between file/directory
+        SendPathTextBox.Text = "";
+        UpdateSendButtonState();
+    }
+
+    private void UpdateSendButtonState()
+    {
+        bool isValid = !string.IsNullOrWhiteSpace(SendPathTextBox.Text) &&
+                      (File.Exists(SendPathTextBox.Text) || Directory.Exists(SendPathTextBox.Text));
+        SendButton.IsEnabled = isValid;
+    }
+
+    private async void SendButton_Click(object sender, RoutedEventArgs e)
+    {
+        string path = SendPathTextBox.Text.Trim();
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            System.Windows.MessageBox.Show("Please select a file or directory to send.",
+                          "Input Required", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (!File.Exists(path) && !Directory.Exists(path))
+        {
+            System.Windows.MessageBox.Show("The selected file or directory does not exist.",
+                          "Invalid Path", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        await StartSendCrocProcess(path);
+    }
+
+    private async Task StartSendCrocProcess(string path)
+    {
+        try
+        {
+            // Disable controls during execution
+            SetSendControlsEnabled(false);
+            ClearSendOutput();
+            ResetSendProgress();
+            SendCodeTextBox.Text = ""; // Clear previous code
+
+            // Start the croc process
+            _crocProcess = new Process();
+            _crocProcess.StartInfo.FileName = "croc";
+            _crocProcess.StartInfo.Arguments = $"send \"{path}\"";
+            _crocProcess.StartInfo.UseShellExecute = false;
+            _crocProcess.StartInfo.RedirectStandardOutput = true;
+            _crocProcess.StartInfo.RedirectStandardError = true;
+            _crocProcess.StartInfo.CreateNoWindow = true;
+
+            string extractedCode = "";
+
+            _crocProcess.OutputDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    // Try to extract code from "Code is: <code>" line
+                    if (string.IsNullOrWhiteSpace(extractedCode))
+                    {
+                        var match = System.Text.RegularExpressions.Regex.Match(e.Data.Trim(), @"^Code is:\s*([^\s]+)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                        if (match.Success)
+                        {
+                            extractedCode = match.Groups[1].Value;
+                            SendCodeTextBox.Dispatcher.Invoke(() =>
+                            {
+                                SendCodeTextBox.Text = extractedCode;
+                            });
+                        }
+                    }
+
+                    if (TryParseProgress(e.Data, out double progress))
+                    {
+                        UpdateSendProgress(progress);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(e.Data))
+                    {
+                        AppendSendOutput(e.Data);
+                    }
+                    // Skip empty/whitespace-only lines
+                }
+            };
+
+            _crocProcess.ErrorDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                {
+                    // Try to extract code from "Code is: <code>" line (also check stderr)
+                    if (string.IsNullOrWhiteSpace(extractedCode))
+                    {
+                        var match = System.Text.RegularExpressions.Regex.Match(e.Data.Trim(), @"^Code is:\s*([^\s]+)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                        if (match.Success)
+                        {
+                            extractedCode = match.Groups[1].Value;
+                            SendCodeTextBox.Dispatcher.Invoke(() =>
+                            {
+                                SendCodeTextBox.Text = extractedCode;
+                            });
+                        }
+                    }
+
+                    if (TryParseProgress(e.Data, out double progress))
+                    {
+                        UpdateSendProgress(progress);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(e.Data))
+                    {
+                        AppendSendOutput(e.Data);
+                    }
+                    // Skip empty/whitespace-only lines
+                }
+            };
+
+            AppendSendOutput($"Starting croc send for: {path}");
+            AppendSendOutput($"Command: croc send \"{path}\"");
+            AppendSendOutput("");
+
+            _crocProcess.Start();
+            _crocProcess.BeginOutputReadLine();
+            _crocProcess.BeginErrorReadLine();
+
+            // Wait for process to complete
+            await Task.Run(() => _crocProcess.WaitForExit());
+
+            AppendSendOutput("");
+            AppendSendOutput("Process completed.");
+            AppendSendOutput($"Exit code: {_crocProcess.ExitCode}");
+
+            // Re-enable controls
+            SetSendControlsEnabled(true);
+        }
+        catch (Exception ex)
+        {
+            AppendSendOutput($"Error: {ex.Message}");
+            SetSendControlsEnabled(true);
+        }
+        finally
+        {
+            _crocProcess = null;
+        }
+    }
+
+    private void SendCancelButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_crocProcess != null && !_crocProcess.HasExited)
+        {
+            AppendSendOutput("Stopping croc process...");
+            _crocProcess.Kill();
+            _crocProcess = null;
+            SetSendControlsEnabled(true);
+        }
+    }
+
+    private void SetSendControlsEnabled(bool enabled)
+    {
+        SendFileRadio.IsEnabled = enabled;
+        SendDirectoryRadio.IsEnabled = enabled;
+        SendPathTextBox.IsEnabled = enabled;
+        SendBrowseButton.IsEnabled = enabled;
+        SendButton.IsEnabled = enabled && !string.IsNullOrWhiteSpace(SendPathTextBox.Text) &&
+                              (File.Exists(SendPathTextBox.Text) || Directory.Exists(SendPathTextBox.Text));
+        SendCancelButton.IsEnabled = !enabled;
+    }
+
+    private void ClearSendOutput()
+    {
+        SendOutputTextBox.Text = "";
+    }
+
+    private void AppendSendOutput(string text)
+    {
+        lock (_outputLock)
+        {
+            SendOutputTextBox.Dispatcher.Invoke(() =>
+            {
+                SendOutputTextBox.AppendText(text + Environment.NewLine);
+                SendOutputTextBox.ScrollToEnd();
+            });
+        }
+    }
+
+    private void ResetSendProgress()
+    {
+        SendProgressBar.Dispatcher.Invoke(() =>
+        {
+            SendProgressBar.Value = 0;
+        });
+    }
+
+    private void UpdateSendProgress(double progress)
+    {
+        SendProgressBar.Dispatcher.Invoke(() =>
+        {
+            SendProgressBar.Value = progress;
         });
     }
 }
