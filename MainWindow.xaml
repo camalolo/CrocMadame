@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CrocMadame"
         mc:Ignorable="d"
-        Title="Croc File Downloader" Height="600" Width="800" SizeToContent="Height" WindowStartupLocation="CenterScreen">
+        Title="CrocMadame" Height="600" Width="800" SizeToContent="Height" WindowStartupLocation="CenterScreen">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
